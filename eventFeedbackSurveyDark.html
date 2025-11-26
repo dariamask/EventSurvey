@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Pulse - Feedback Portal</title>
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #8b5cf6;
+            --secondary: #06d6a0;
+            --dark: #0f0f23;
+            --darker: #090915;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .survey-stepper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .stepper-line {
+            position: absolute;
+            top: 24px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: var(--glass-border);
+            z-index: 1;
+        }
+        
+        .step {
+            width: 120px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .step.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-label {
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        .survey-content {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .survey-section {
+            display: none;
+        }
+        
+        .survey-section.active {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .section-description {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .required::after {
+            content: " *";
+            color: #ef4444;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .rating-item {
+            text-align: center;
+            padding: 15px 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .rating-item:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        
+        .rating-item.selected {
+            background: var(--primary);
+            border-color: var(--primary-light);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+        }
+        
+        .rating-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .rating-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        
+        .rating-item.selected .rating-label {
+            color: white;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-item:hover, .radio-item:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .checkbox-item input, .radio-item input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-prev {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .btn-prev:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-next, .btn-submit {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+        
+        .btn-next:hover, .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: var(--glass);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .rating-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .survey-content {
+                padding: 24px;
+            }
+            
+            .stepper-line {
+                left: 30px;
+                right: 30px;
+            }
+            
+            .step {
+                width: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Event Pulse</h1>
+            <p class="subtitle">Share your experience and help us create unforgettable events</p>
+        </header>
+        
+        <div class="survey-stepper">
+            <div class="stepper-line"></div>
+            <div class="step active" data-step="pre-event">
+                <div class="step-circle">1</div>
+                <div class="step-label">Pre-Event</div>
+            </div>
+            <div class="step" data-step="during-event">
+                <div class="step-circle">2</div>
+                <div class="step-label">During Event</div>
+            </div>
+            <div class="step" data-step="post-event">
+                <div class="step-circle">3</div>
+                <div class="step-label">Post-Event</div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-text">
+                <span>Survey Progress</span>
+                <span id="progress-percent">33%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 33%"></div>
+            </div>
+        </div>
+        
+        <div class="survey-content">
+            <!-- Pre-Event Survey -->
+            <div class="survey-section active" id="pre-event">
+                <h2>Pre-Event Expectations</h2>
+                <p class="section-description">Tell us what you're looking forward to and help us tailor the experience</p>
+                
+                <form id="pre-event-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name" class="required">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="required">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="expectations" class="required">What are your main expectations for this event?</label>
+                            <textarea id="expectations" name="expectations" placeholder="I'm hoping to learn about..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="required">How excited are you about this event?</label>
+                            <div class="rating-grid">
+                                <div class="rating-item">
+                                    <div class="rating-value">1</div>
+                                    <div class="rating-label">Not Excited</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">2</div>
+                                    <div class="rating-label">Slightly</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">3</div>
+                                    <div class="rating-label">Neutral</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">4</div>
+                                    <div class="rating-label">Excited</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">5</div>
+                                    <div class="rating-label">Very Excited</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="required">What are you most interested in? (Select all that apply)</label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="networking" name="interests" value="networking">
+                                    <label for="networking">Networking</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="keynotes" name="interests" value="keynotes">
+                                    <label for="keynotes">Keynote Speeches</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="workshops" name="interests" value="workshops">
+                                    <label for="workshops">Workshops</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="exhibitions" name="interests" value="exhibitions">
+                                    <label for="exhibitions">Exhibitions</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-prev" disabled>
+                            <span>Previous</span>
+                        </button>
+                        <button type="button" class="btn btn-next">
+                            <span>Continue to During Event</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- During Event Survey -->
+            <div class="survey-section" id="during-event">
+                <h2>Live Event Feedback</h2>
+                <p class="section-description">Share your real-time experience as the event unfolds</p>
+                
+                <form id="during-event-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="current-session" class="required">Current Session</label>
+                            <input type="text" id="current-session" name="current-session" placeholder="Which session are you attending?" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="session-rating" class="required">Session Rating</label>
+                            <select id="session-rating" name="session-rating" required>
+                                <option value="">Select rating</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="average">Average</option>
+                                <option value="poor">Poor</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="session-highlights">What's standing out in this session?</label>
+                            <textarea id="session-highlights" name="session-highlights" placeholder="The most valuable part so far..."></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="suggestions">Any immediate suggestions for improvement?</label>
+                            <textarea id="suggestions" name="suggestions" placeholder="It would be great if..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-prev">
+                            <span>Back to Pre-Event</span>
+                        </button>
+                        <button type="button" class="btn btn-next">
+                            <span>Continue to Post-Event</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Post-Event Survey -->
+            <div class="survey-section" id="post-event">
+                <h2>Post-Event Reflection</h2>
+                <p class="section-description">Help us improve future events with your valuable feedback</p>
+                
+                <form id="post-event-form">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="required">Overall Event Rating</label>
+                            <div class="rating-grid">
+                                <div class="rating-item">
+                                    <div class="rating-value">1</div>
+                                    <div class="rating-label">Poor</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">2</div>
+                                    <div class="rating-label">Fair</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">3</div>
+                                    <div class="rating-label">Good</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">4</div>
+                                    <div class="rating-label">Very Good</div>
+                                </div>
+                                <div class="rating-item">
+                                    <div class="rating-value">5</div>
+                                    <div class="rating-label">Excellent</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="favorite-moment" class="required">Favorite Moment</label>
+                            <input type="text" id="favorite-moment" name="favorite-moment" placeholder="The most memorable part..." required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="key-takeaway" class="required">Key Takeaway</label>
+                            <input type="text" id="key-takeaway" name="key-takeaway" placeholder="The most valuable insight..." required>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="improvements">What could make the next event even better?</label>
+                            <textarea id="improvements" name="improvements" placeholder="Suggestions for improvement..."></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="required">Would you recommend this event to others?</label>
+                            <div class="checkbox-grid">
+                                <div class="radio-item">
+                                    <input type="radio" id="recommend-yes" name="recommend" value="yes" required>
+                                    <label for="recommend-yes">Definitely Yes</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="recommend-probably" name="recommend" value="probably">
+                                    <label for="recommend-probably">Probably</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="recommend-maybe" name="recommend" value="maybe">
+                                    <label for="recommend-maybe">Maybe</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="recommend-no" name="recommend" value="no">
+                                    <label for="recommend-no">Probably Not</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-prev">
+                            <span>Back to During Event</span>
+                        </button>
+                        <button type="submit" class="btn btn-submit">
+                            <span>Submit Feedback</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation between survey sections
+        const steps = document.querySelectorAll('.step');
+        const sections = document.querySelectorAll('.survey-section');
+        const progressFill = document.querySelector('.progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        
+        // Step navigation
+        steps.forEach(step => {
+            step.addEventListener('click', () => {
+                const targetStep = step.getAttribute('data-step');
+                navigateToStep(targetStep);
+            });
+        });
+        
+        // Next/Prev buttons
+        document.querySelectorAll('.btn-next').forEach(btn => {
+            btn.addEventListener('click', goToNextStep);
+        });
+        
+        document.querySelectorAll('.btn-prev').forEach(btn => {
+            btn.addEventListener('click', goToPrevStep);
+        });
+        
+        // Rating selection
+        document.querySelectorAll('.rating-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const container = item.parentElement;
+                container.querySelectorAll('.rating-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            });
+        });
+        
+        function navigateToStep(stepId) {
+            // Update steps
+            steps.forEach(step => {
+                if (step.getAttribute('data-step') === stepId) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+            
+            // Update sections
+            sections.forEach(section => {
+                if (section.id === stepId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            
+            // Update progress
+            updateProgress(stepId);
+        }
+        
+        function goToNextStep() {
+            const currentStep = document.querySelector('.step.active').getAttribute('data-step');
+            let nextStep;
+            
+            if (currentStep === 'pre-event') nextStep = 'during-event';
+            else if (currentStep === 'during-event') nextStep = 'post-event';
+            else return;
+            
+            navigateToStep(nextStep);
+        }
+        
+        function goToPrevStep() {
+            const currentStep = document.querySelector('.step.active').getAttribute('data-step');
+            let prevStep;
+            
+            if (currentStep === 'during-event') prevStep = 'pre-event';
+            else if (currentStep === 'post-event') prevStep = 'during-event';
+            else return;
+            
+            navigateToStep(prevStep);
+        }
+        
+        function updateProgress(stepId) {
+            let progress;
+            
+            if (stepId === 'pre-event') progress = 33;
+            else if (stepId === 'during-event') progress = 66;
+            else if (stepId === 'post-event') progress = 100;
+            
+            progressFill.style.width = `${progress}%`;
+            progressPercent.textContent = `${progress}%`;
+        }
+        
+        // Form submission
+        document.getElementById('post-event-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your valuable feedback! Your responses have been recorded.');
+            // In real application, send data to server
+        });
+    </script>
+</body>
+</html>
