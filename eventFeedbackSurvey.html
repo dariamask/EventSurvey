@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Feedback Survey</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .survey-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .tab:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .survey-container {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .survey-section {
+            display: none;
+        }
+        
+        .survey-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--success);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .rating-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 0 5px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .rating-option:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .rating-option.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .checkbox-group, .radio-group {
+            margin: 10px 0;
+        }
+        
+        .checkbox-group label, .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input, .radio-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #e63946;
+        }
+        
+        @media (max-width: 768px) {
+            .survey-tabs {
+                flex-direction: column;
+            }
+            
+            .rating-container {
+                flex-wrap: wrap;
+            }
+            
+            .rating-option {
+                flex: 0 0 48%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Event Feedback Survey</h1>
+            <p>Help us improve our events by sharing your feedback</p>
+        </header>
+        
+        <div class="survey-tabs">
+            <div class="tab active" data-tab="pre-event">Pre-Event</div>
+            <div class="tab" data-tab="during-event">During Event</div>
+            <div class="tab" data-tab="post-event">Post-Event</div>
+        </div>
+        
+        <div class="survey-container">
+            <!-- Pre-Event Survey -->
+            <div class="survey-section active" id="pre-event">
+                <h2>Pre-Event Survey</h2>
+                <div class="progress-bar">
+                    <div class="progress" style="width: 33%"></div>
+                </div>
+                
+                <form id="pre-event-form">
+                    <div class="form-group">
+                        <label for="name" class="required">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="required">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expectations" class="required">What are your expectations for this event?</label>
+                        <textarea id="expectations" name="expectations" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">How did you hear about this event?</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="source" value="social-media"> Social Media</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="source" value="email"> Email Newsletter</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="source" value="friend"> Friend/Colleague</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="source" value="website"> Company Website</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="source" value="other"> Other</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topics" class="required">Which topics are you most interested in?</label>
+                        <select id="topics" name="topics" required>
+                            <option value="">Please select</option>
+                            <option value="networking">Networking</option>
+                            <option value="keynote">Keynote Speeches</option>
+                            <option value="workshops">Workshops</option>
+                            <option value="exhibitions">Exhibitions</option>
+                            <option value="all">All of the above</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Submit Pre-Event Survey</button>
+                </form>
+            </div>
+            
+            <!-- During Event Survey -->
+            <div class="survey-section" id="during-event">
+                <h2>During Event Survey</h2>
+                <div class="progress-bar">
+                    <div class="progress" style="width: 66%"></div>
+                </div>
+                
+                <form id="during-event-form">
+                    <div class="form-group">
+                        <label for="session" class="required">Which session are you currently attending?</label>
+                        <input type="text" id="session" name="session" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">How would you rate this session so far?</label>
+                        <div class="rating-container">
+                            <div class="rating-option">Poor</div>
+                            <div class="rating-option">Fair</div>
+                            <div class="rating-option">Good</div>
+                            <div class="rating-option">Very Good</div>
+                            <div class="rating-option">Excellent</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="session-feedback">What do you like most about this session?</label>
+                        <textarea id="session-feedback" name="session-feedback"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="improvements">Any suggestions for improvement during the event?</label>
+                        <textarea id="improvements" name="improvements"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Is the event meeting your expectations so far?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="expectations-met" value="yes" required> Yes, completely</label>
+                        </div>
+                        <div class="radio-group">
+                            <label><input type="radio" name="expectations-met" value="somewhat"> Somewhat</label>
+                        </div>
+                        <div class="radio-group">
+                            <label><input type="radio" name="expectations-met" value="no"> Not at all</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Submit During-Event Feedback</button>
+                </form>
+            </div>
+            
+            <!-- Post-Event Survey -->
+            <div class="survey-section" id="post-event">
+                <h2>Post-Event Survey</h2>
+                <div class="progress-bar">
+                    <div class="progress" style="width: 100%"></div>
+                </div>
+                
+                <form id="post-event-form">
+                    <div class="form-group">
+                        <label class="required">Overall, how would you rate the event?</label>
+                        <div class="rating-container">
+                            <div class="rating-option">Poor</div>
+                            <div class="rating-option">Fair</div>
+                            <div class="rating-option">Good</div>
+                            <div class="rating-option">Very Good</div>
+                            <div class="rating-option">Excellent</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="favorite-part">What was your favorite part of the event?</label>
+                        <textarea id="favorite-part" name="favorite-part"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="least-favorite">What could be improved for future events?</label>
+                        <textarea id="least-favorite" name="least-favorite"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">How likely are you to recommend this event to others?</label>
+                        <div class="rating-container">
+                            <div class="rating-option">Very Unlikely</div>
+                            <div class="rating-option">Unlikely</div>
+                            <div class="rating-option">Neutral</div>
+                            <div class="rating-option">Likely</div>
+                            <div class="rating-option">Very Likely</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="suggestions">Any other comments or suggestions?</label>
+                        <textarea id="suggestions" name="suggestions"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Would you be interested in attending future events from us?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="future-events" value="yes"> Yes</label>
+                        </div>
+                        <div class="radio-group">
+                            <label><input type="radio" name="future-events" value="maybe"> Maybe</label>
+                        </div>
+                        <div class="radio-group">
+                            <label><input type="radio" name="future-events" value="no"> No</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Submit Post-Event Survey</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and sections
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.survey-section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding section
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Rating selection functionality
+        document.querySelectorAll('.rating-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const container = option.parentElement;
+                container.querySelectorAll('.rating-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+        
+        // Form submission handling
+        document.getElementById('pre-event-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for completing the pre-event survey!');
+            // In a real application, you would send this data to a server
+        });
+        
+        document.getElementById('during-event-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your during-event feedback!');
+            // In a real application, you would send this data to a server
+        });
+        
+        document.getElementById('post-event-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for completing the post-event survey!');
+            // In a real application, you would send this data to a server
+        });
+    </script>
+</body>
+</html>
